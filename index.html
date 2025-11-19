@@ -3,376 +3,214 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>オリキャラ一覧</title>
+<title>OC List Café Style</title>
+
 <style>
   :root{
-    --bg:#f7f8fb;
+    --cafe-bg:#f8f3e7;
     --card:#ffffff;
-    --accent:#ff6b6b;
-    --text:#222;
-    --muted:#666;
-    --gap:12px;
-    --radius:12px;
+    --brown:#5a4633;
+    --milk:#d7c7b5;
+    --shadow:rgba(80,60,40,0.18);
+    --radius:14px;
+    --gap:14px;
   }
+
   body{
     margin:0;
-    font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    background:var(--bg);
-    color:var(--text);
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    padding:20px;
+    background:var(--cafe-bg);
+    font-family:"Hiragino Sans","Noto Sans JP",system-ui;
+    padding:22px;
+    color:var(--brown);
   }
 
   h1{
-    margin:0 0 18px 0;
-    font-size:20px;
+    font-size:22px;
+    font-weight:800;
+    margin:0 0 20px;
+    letter-spacing:1px;
   }
 
-  /* グリッド */
   .grid{
     display:grid;
-    grid-template-columns: repeat(2, 1fr);
     gap:var(--gap);
-  }
-  @media (min-width:640px){
-    .grid{ grid-template-columns: repeat(3, 1fr); }
-  }
-  @media (min-width:1000px){
-    .grid{ grid-template-columns: repeat(4, 1fr); }
+    grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
   }
 
-  /* カード（タッチしやすいサイズ） */
   .card{
     background:var(--card);
     border-radius:var(--radius);
+    box-shadow:0 4px 12px var(--shadow);
     padding:12px;
-    box-shadow: 0 6px 18px rgba(15,20,30,0.06);
-    display:flex;
-    gap:10px;
-    align-items:center;
     cursor:pointer;
-    transition:transform .12s ease, box-shadow .12s ease;
-    touch-action:manipulation;
+    transition:transform .15s ease, box-shadow .15s ease;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
   }
-  .card:active { transform:scale(.996); }
-  .card:focus { outline: 3px solid rgba(255,107,107,.14); }
+  .card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 10px 22px var(--shadow);
+  }
 
   .avatar{
-    width:64px;
-    height:64px;
-    border-radius:10px;
-    flex:0 0 64px;
-    display:inline-grid;
-    place-items:center;
-    font-size:28px;
-    background:linear-gradient(135deg,#fff,#f4f4f6);
-    overflow:hidden;
+    width:110px;
+    height:110px;
+    border-radius:12px;
+    object-fit:cover;
+    margin-bottom:10px;
+    background:#eee;
   }
-  .meta{
-    flex:1;
-    min-width:0;
-  }
+
   .furigana{
     font-size:12px;
-    color:var(--muted);
-    line-height:1;
+    color:#8d7b6b;
   }
   .name{
-    font-weight:700;
     margin-top:4px;
-    font-size:15px;
-    white-space:nowrap;
-    text-overflow:ellipsis;
-    overflow:hidden;
+    font-size:16px;
+    font-weight:700;
+    text-align:center;
   }
 
   /* モーダル */
   .overlay{
     position:fixed;
     inset:0;
+    background:rgba(0,0,0,.45);
     display:none;
-    background:rgba(10,12,16,0.45);
-    align-items:center;
     justify-content:center;
-    z-index:40;
+    align-items:center;
+    z-index:50;
     padding:20px;
   }
   .overlay.open{ display:flex; }
 
   .panel{
-    width:100%;
-    max-width:720px;
     background:var(--card);
-    border-radius:14px;
-    box-shadow:0 20px 40px rgba(10,12,16,0.25);
-    padding:18px;
+    border-radius:var(--radius);
+    padding:20px;
+    max-width:600px;
+    width:100%;
     display:grid;
-    grid-template-columns: 110px 1fr;
-    gap:14px;
-    align-items:start;
-  }
-  @media (max-width:520px){
-    .panel{ grid-template-columns: 84px 1fr; padding:14px; }
-    .avatar{ width:84px; height:84px; border-radius:10px; font-size:36px; }
+    grid-template-columns:130px 1fr;
+    gap:18px;
+    position:relative;
+    box-shadow:0 14px 36px rgba(0,0,0,.3);
   }
 
-  .panel .title{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-  }
-  .panel .title .bigname{ font-size:20px; font-weight:800; }
-  .panel .title .small{ color:var(--muted); font-size:13px; }
-
-  .closebtn{
-    position:absolute;
-    right:18px;
-    top:18px;
-    background:none;
-    border:0;
-    color:var(--muted);
-    font-size:18px;
-    cursor:pointer;
+  .panel img{
+    width:130px;
+    height:130px;
+    border-radius:12px;
+    object-fit:cover;
+    background:#eee;
   }
 
-  .profile{
-    font-size:14px;
-    color:var(--text);
+  .panel-name{
+    font-size:22px;
+    font-weight:800;
+  }
+  .panel-furi{
+    font-size:13px;
+    color:#8d7b6b;
+  }
+  .panel-profile{
+    margin-top:10px;
     line-height:1.6;
+    font-size:14px;
   }
 
-  .meta-row{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-top:8px;
+  .close-btn{
+    position:absolute;
+    right:12px;
+    top:10px;
+    font-size:28px;
+    cursor:pointer;
+    color:var(--brown);
   }
-  .chip{
-    background:#f2f6ff;
-    padding:6px 8px;
-    border-radius:999px;
-    font-size:12px;
-    color:#234;
-  }
-
-  /* アクセシビリティのためのフォーカス表示 */
-  .card:focus-visible{
-    box-shadow:0 6px 18px rgba(15,20,30,0.12);
-    transform:translateY(-2px);
-  }
-
-  /* 説明テキスト */
-  .hint{ color:var(--muted); font-size:13px; margin-bottom:8px; }
-
 </style>
 </head>
+
 <body>
-  <h1>オリキャラ一覧</h1>
-  <p class="hint">タップ／クリックでキャラ情報を表示します。サンプルを編集して自分のキャラを追加してください。</p>
 
-  <div id="grid" class="grid" role="list"></div>
+<h1>☕ オリキャラ メニュー</h1>
 
-  <!-- モーダル -->
-  <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="panel" role="document" aria-labelledby="cp-name">
-      <button id="closeBtn" class="closebtn" aria-label="閉じる">✕</button>
-      <div class="avatar" id="modalAvatar" aria-hidden="true">🐾</div>
-      <div>
-        <div class="title">
-          <div id="cp-furigana" class="small">ふりがな</div>
-          <div id="cp-name" class="bigname">名前</div>
-          <div id="cp-sub" class="small">（サブ情報）</div>
-        </div>
+<div class="grid" id="oc-grid"></div>
 
-        <div class="meta-row" id="metaRow" style="margin-top:10px;"></div>
-
-        <div class="profile" id="cp-desc" style="margin-top:10px;">
-          キャラクタープロフィールがここに入ります。
-        </div>
-      </div>
+<!-- モーダル -->
+<div class="overlay" id="overlay">
+  <div class="panel">
+    <span class="close-btn" id="close">×</span>
+    <img id="modal-img" src="">
+    <div>
+      <div class="panel-furi" id="modal-furi"></div>
+      <div class="panel-name" id="modal-name"></div>
+      <div class="panel-profile" id="modal-profile"></div>
     </div>
   </div>
+</div>
 
 <script>
-/*
-  キャラデータはここを編集してください。
-  fields:
-    icon: 1文字の絵文字や画像のURL（外部画像使いたい場合は <img> を設定するようにJSを調整）
-    furigana: ふりがな
-    name: 表示名
-    sub: 年齢や種族などの短いサブ情報
-    tags: 配列（性格や職業など）
-    desc: 長い説明（HTMLも可能）
-*/
-const characters = [
-  {
-    icon: "🌸",
-    furigana: "よつは",
-    name: "四葉（よつは）",
-    sub: "17歳 / 学生",
-    tags: ["元気", "天然", "花好き"],
-    desc: "明るくてお花が好きな女の子。小さなことで幸せになれるタイプ。趣味は公園でお散歩と折り紙。"
-  },
-  {
-    icon: "🦊",
-    furigana: "こまち",
-    name: "小町（こまち）",
-    sub: "不明 / 妖",
-    tags: ["いたずら好き", "神出鬼没"],
-    desc: "謎多き狐の妖。夜行性で静かな場所にいることが好き。人間にはめったに姿を見せない。"
-  },
-  {
-    icon: "🔥",
-    furigana: "たける",
-    name: "武（たける）",
-    sub: "28歳 / 戦士",
-    tags: ["熱血", "まっすぐ"],
-    desc: "熱くて真っ直ぐな戦士。仲間のことを何より大事にする。普段は無口だが怒ると怖い。"
-  },
-  {
-    icon: "🧸",
-    furigana: "もも",
-    name: "桃乃（ももの）",
-    sub: "8歳 / 子供",
-    tags: ["無邪気", "お菓子好き"],
-    desc: "甘いものに目がない可愛い子。好奇心旺盛でトラブルメーカー。"
-  },
-  {
-    icon: "🪄",
-    furigana: "れい",
-    name: "零（れい）",
-    sub: "魔術師",
-    tags: ["クール", "観察者"],
-    desc: "冷静沈着な魔術師。感情を表に出さないが仲間想い。"
-  },
-  {
-    icon: "🐾",
-    furigana: "ごっちゃん",
-    name: "ごまどうふ（ごっちゃん）",
-    sub: "猫 / マンチカン",
-    tags: ["噛む", "短足"],
-    desc: "短足でよく噛む不思議な猫。飼い主をよく観察している。"
-  }
-];
+  /* ▼ ここでオリキャラをオブジェクトで管理！ ▼ */
 
-/* DOM 生成 */
-const grid = document.getElementById('grid');
-characters.forEach((c, idx) => {
-  const btn = document.createElement('button');
-  btn.className = 'card';
-  btn.type = 'button';
-  btn.setAttribute('role','listitem');
-  btn.setAttribute('aria-label', `${c.furigana} ${c.name} の詳細を見る`);
-  btn.dataset.index = idx;
+  const OCs = [
+    {
+      id: 1,
+      name: "アメ",
+      furi: "あめ",
+      img: "img/ame.png",
+      profile: "しっぽがふわふわの女の子。雨の日が好きで、静かな場所を好む。"
+    },
+    {
+      id: 2,
+      name: "クロノ",
+      furi: "くろの",
+      img: "img/kurono.png",
+      profile: "時間を操る青年。コーヒーが大好物。"
+    },
+    {
+      id: 3,
+      name: "ソラ",
+      furi: "そら",
+      img: "img/sora.png",
+      profile: "空を飛べる元気キャラ。甘いラテが好き。"
+    }
+  ];
 
-  // 中身
-  const av = document.createElement('div');
-  av.className = 'avatar';
-  av.innerText = c.icon || '？';
+  /* ▼ グリッドへ生成 ▼ */
+  const grid = document.getElementById("oc-grid");
 
-  const meta = document.createElement('div');
-  meta.className = 'meta';
-  const fr = document.createElement('div');
-  fr.className = 'furigana';
-  fr.innerText = c.furigana || '';
-  const nm = document.createElement('div');
-  nm.className = 'name';
-  nm.innerText = c.name || '';
-
-  meta.appendChild(fr);
-  meta.appendChild(nm);
-
-  btn.appendChild(av);
-  btn.appendChild(meta);
-
-  // タッチ・クリックでモーダルを開く
-  btn.addEventListener('click', () => openModal(idx));
-  btn.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(idx); }
+  OCs.forEach(c => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <img class="avatar" src="${c.img}">
+      <div class="furigana">${c.furi}</div>
+      <div class="name">${c.name}</div>
+    `;
+    card.onclick = () => openModal(c);
+    grid.appendChild(card);
   });
 
-  grid.appendChild(btn);
-});
+  /* ▼ モーダル制御 ▼ */
 
-/* モーダル操作 */
-const overlay = document.getElementById('overlay');
-const modalAvatar = document.getElementById('modalAvatar');
-const cpFurigana = document.getElementById('cp-furigana');
-const cpName = document.getElementById('cp-name');
-const cpSub = document.getElementById('cp-sub');
-const cpDesc = document.getElementById('cp-desc');
-const metaRow = document.getElementById('metaRow');
-const closeBtn = document.getElementById('closeBtn');
+  const overlay = document.getElementById("overlay");
+  const closeBtn = document.getElementById("close");
 
-let lastFocused = null;
+  function openModal(c){
+    document.getElementById("modal-img").src = c.img;
+    document.getElementById("modal-furi").textContent = c.furi;
+    document.getElementById("modal-name").textContent = c.name;
+    document.getElementById("modal-profile").textContent = c.profile;
 
-function openModal(index){
-  const c = characters[index];
-  lastFocused = document.activeElement;
-  modalAvatar.innerText = c.icon || '？';
-  cpFurigana.innerText = c.furigana || '';
-  cpName.innerText = c.name || '';
-  cpSub.innerText = c.sub || '';
-  cpDesc.innerText = c.desc || '';
-
-  // メタ（タグ）
-  metaRow.innerHTML = '';
-  if(Array.isArray(c.tags)){
-    c.tags.forEach(t => {
-      const chip = document.createElement('div');
-      chip.className = 'chip';
-      chip.innerText = t;
-      metaRow.appendChild(chip);
-    });
+    overlay.classList.add("open");
   }
 
-  overlay.classList.add('open');
-  overlay.setAttribute('aria-hidden','false');
-  // フォーカスを閉じるボタンへ
-  closeBtn.focus();
+  closeBtn.onclick = () => overlay.classList.remove("open");
+  overlay.onclick = (e) => { if(e.target === overlay) overlay.classList.remove("open"); };
 
-  // スワイプやタッチ向けにオーバーレイクリックで閉じる（ただしパネル内クリックは除外）
-  // （既に handled by event listener below）
-}
-
-function closeModal(){
-  overlay.classList.remove('open');
-  overlay.setAttribute('aria-hidden','true');
-  if(lastFocused) lastFocused.focus();
-}
-
-/* イベント */
-closeBtn.addEventListener('click', closeModal);
-overlay.addEventListener('click', (ev) => {
-  if(ev.target === overlay) closeModal(); // 背景クリックで閉じる
-});
-// ESCで閉じる
-document.addEventListener('keydown', (e) => {
-  if(e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
-});
-
-/* モバイルでのスワイプで閉じる（簡易） */
-let startY = null;
-overlay.addEventListener('touchstart', (e) => {
-  if(e.touches.length === 1) startY = e.touches[0].clientY;
-}, {passive:true});
-overlay.addEventListener('touchmove', (e) => {
-  if(startY === null) return;
-  const diff = e.touches[0].clientY - startY;
-  if(diff > 120) { // 下にスワイプしたら閉じる
-    closeModal();
-    startY = null;
-  }
-}, {passive:true});
-overlay.addEventListener('touchend', () => startY = null);
-
-/* --- カスタムのヒント ---
-  ・もっと多くのフィールド（例: birthday, likes, voice）を追加したい場合は characters 配列にプロパティを足して
-    openModal() の中で表示要素を作ってください。
-  ・icon に画像URLを使う場合は avatar 要素内に <img src="..."> を差し込む処理に変更してください。
-  ・カードに並べ替え／フィルタをつける場合は JS で characters を操作して grid を再描画してください。
-*/
 </script>
+
 </body>
 </html>
